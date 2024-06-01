@@ -1,5 +1,5 @@
 <template>
-  <v-footer app color="grey darken-3" padless class="text-body-1 d-flex align-center justify-center flex-column">
+  <v-footer color="grey darken-3" padless class="text-body-1 d-flex align-center justify-center flex-column">
     <v-container>
       <v-row justify="center">
         <v-col v-for="(item, index) in footerItems" :key="index" cols="12" md="3" class="text-center">
@@ -62,6 +62,7 @@ export default {
   padding: 24px; 
   color: white;
   border-top: 10px solid #FF9800; 
+  width: 100%;
 }
 
 .v-divider {
