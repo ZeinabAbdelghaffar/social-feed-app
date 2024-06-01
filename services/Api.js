@@ -25,17 +25,15 @@ export const fetchUser = (id) => {
 };
 
 export const fetchComments = (postId, skip = 0, limit = 5) => {
-  return axios.get(`https://dummyjson.com/comments/post/${postId}`, { params: { skip, limit } })
-    .then(response => response.data)
+  return axios.get(`${API_URL}/comments/post/${postId}`, { params: { skip, limit } })
+    .then(response => {
+      if (response.data && response.data.comments) {
+        return response.data;
+      } else {
+        throw new Error('No comments found');
+      }
+    })
     .catch(error => {
       throw error;
     });
 };
-
-export const updateReactionCount = (postId, reactionType, count) => {
-  return axios.post(`${API_URL}/update-reaction`, { postId, reactionType, count })
-    .then(response => response.data)
-    .catch(error => {
-      throw error;
-    });
-}

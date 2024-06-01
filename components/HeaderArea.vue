@@ -4,12 +4,6 @@
   </header>
 </template>
 
-<script>
-export default {
-
-};
-</script>
-
 <style scoped>
 .header {
   background-color: #1E1E1E;

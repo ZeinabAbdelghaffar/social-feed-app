@@ -9,13 +9,13 @@
 <script>
 import CreatorArea from './CreatorArea.vue';
 import ActionsArea from './ActionsArea.vue';
-import CommentsArea from './CommentsArea.vue';
+import CommentsArea from './CommentsArea.vue'; // Import the CommentsArea component
 
 export default {
   components: {
     CreatorArea,
     ActionsArea,
-    CommentsArea
+    CommentsArea // Include the CommentsArea component
   },
   props: {
     post: {
@@ -25,17 +25,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.post-container {
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
-}
-
-.post-container:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-</style>

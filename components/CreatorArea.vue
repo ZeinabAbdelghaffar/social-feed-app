@@ -84,13 +84,13 @@ export default {
 
 .show-more,
 .show-less {
-  color: #007bff;
+  color: #007bff !important; 
   cursor: pointer;
   text-decoration: underline;
 }
 
 .show-more:hover,
 .show-less:hover {
-  color: #0056b3;
+  color: #0056b3 !important;
 }
 </style>

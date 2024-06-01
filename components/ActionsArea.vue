@@ -3,7 +3,7 @@
     <v-row>
       <v-col>
         <div class="reaction">
-          <v-btn icon @click="incrementReaction('likes')">
+          <v-btn :class="{ 'reacted': localPost.reacted === 'likes' }" icon @click="toggleReaction('likes')">
             <v-icon>mdi-thumb-up-outline</v-icon>
           </v-btn>
           <span>{{ localPost.reactions.likes }}</span>
@@ -11,25 +11,38 @@
       </v-col>
       <v-col>
         <div class="reaction">
-          <v-btn icon @click="incrementReaction('dislikes')">
+          <v-btn :class="{ 'reacted': localPost.reacted === 'dislikes' }" icon @click="toggleReaction('dislikes')">
             <v-icon>mdi-thumb-down-outline</v-icon>
           </v-btn>
           <span>{{ localPost.reactions.dislikes }}</span>
         </div>
       </v-col>
       <v-col>
-        <v-btn outlined @click="showCommentInput">Comment</v-btn>
+        <v-btn outlined @click="toggleWriteComment">Comment</v-btn>
+        <v-slide-y-transition>
+          <div v-if="showWriteComment">
+            <textarea v-model="newComment" rows="4" cols="50"></textarea>
+            <v-btn @click="addCommentLocally">Add Comment</v-btn>
+          </div>
+        </v-slide-y-transition>
       </v-col>
       <v-col>
-        <v-btn outlined @click="sharePost">Share</v-btn>
+        <v-btn outlined @click="showShareModal = true">Share</v-btn>
+        <v-dialog v-model="showShareModal" max-width="500px">
+          <v-card>
+            <v-card-title>Share Post</v-card-title>
+            <v-card-text>
+              <p>URL: {{ postUrl }}</p>
+              <v-btn @click="copyUrlToClipboard">Copy URL</v-btn>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script>
-import { updateReactionCount } from '@/services/Api';
-
 export default {
   props: {
     post: {
@@ -39,27 +52,46 @@ export default {
   },
   data() {
     return {
-      localPost: { ...this.post } // Create a local copy of the post prop
+      localPost: { ...this.post, reacted: null, comments: [] },
+      showWriteComment: false,
+      newComment: '',
+      showShareModal: false,
     };
   },
+  computed: {
+    postUrl() {
+      return window.location.href;
+    }
+  },
   methods: {
-    async incrementReaction(reactionType) {
-      try {
-        // Increase the corresponding reaction count locally
-        this.localPost.reactions[reactionType]++;
-        // Send a POST request to update the reaction count on the server
-        await updateReactionCount(this.localPost.id, reactionType, this.localPost.reactions[reactionType]);
-      } catch (error) {
-        console.error('Failed to update reaction count:', error);
-        // If there's an error, rollback the local count
+    toggleReaction(reactionType) {
+      if (this.localPost.reacted === reactionType) {
         this.localPost.reactions[reactionType]--;
+        this.localPost.reacted = null;
+      } else {
+        if (this.localPost.reacted) {
+          this.localPost.reactions[this.localPost.reacted]--;
+        }
+        this.localPost.reactions[reactionType]++;
+        this.localPost.reacted = reactionType;
       }
     },
-    showCommentInput() {
-      // Emit an event or perform any necessary action to show comment input
+    toggleWriteComment() {
+      this.showWriteComment = !this.showWriteComment;
     },
-    sharePost() {
-      // Emit an event or perform any necessary action to share the post
+    addCommentLocally() {
+      if (this.newComment.trim() !== '') {
+        this.localPost.comments.push(this.newComment);
+        this.newComment = '';
+      }
+    },
+    copyUrlToClipboard() {
+      const urlInput = document.createElement('textarea');
+      urlInput.value = this.postUrl;
+      document.body.appendChild(urlInput);
+      urlInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(urlInput);
     }
   }
 };
@@ -72,5 +104,8 @@ export default {
 .reaction {
   display: flex;
   align-items: center;
+}
+.reacted {
+  background-color: #e0e0e0;
 }
 </style>
