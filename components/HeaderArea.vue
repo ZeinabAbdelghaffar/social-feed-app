@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <h1 class="header-title">My Social Network</h1>
+    <h1 class="header-title">Social Network</h1>
   </header>
 </template>
 

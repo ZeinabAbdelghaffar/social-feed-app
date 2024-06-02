@@ -11,19 +11,21 @@
             <v-list-item-subtitle class="comment-text">{{ comment.body }}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
-            <v-btn icon @click="reactToComment(comment.id)">
+            <v-btn icon class="reaction-btn" @click="reactToComment(comment.id)">
               <v-icon>mdi-thumb-up-outline</v-icon>
             </v-btn>
             <span>{{ comment.likes }} likes</span>
           </v-list-item-action>
           <v-list-item-action>
-            <v-btn icon @click="shareComment(comment.id)">
+            <v-btn icon class="share-btn" @click="shareComment(comment.id)">
               <v-icon>mdi-share-variant</v-icon>
             </v-btn>
           </v-list-item-action>
         </v-list-item>
       </v-list>
-      <v-btn v-if="visibleComments.length < comments.length" class="view-more-comments" @click="viewMoreComments">View more comments</v-btn>
+      <a v-if="visibleComments.length < comments.length" class="view-more-comments" @click.prevent="viewMoreComments">
+        View more comments
+      </a>      
       <p v-else-if="visibleComments.length === comments.length" class="no-more-comments">No more comments to load.</p>
     </template>
     <template v-else>
@@ -91,7 +93,7 @@ export default {
         const responses = await Promise.all(commentIds.map(commentId => fetch(`https://dummyjson.com/comments/${commentId}/likes`)));
         const likesData = await Promise.all(responses.map(response => response.json()));
         likesData.forEach(data => {
-          this.$set(this.commentLikes, data.commentId, data.likes);
+          this.$set(this.commentLikes, data.id, data.likes);
         });
       } catch (error) {
         console.error('Error fetching comment likes:', error);
@@ -127,10 +129,22 @@ export default {
 }
 
 .view-more-comments {
-  margin-top: 10px;
+  margin-left: 15px;
+  color: #007bff !important; 
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.view-more-comments:hover {
+  color: #0056b3 !important;
 }
 
 .no-more-comments {
   margin-top: 10px;
+  background-color: #FF9800;
+}
+
+.reaction-btn, .share-btn {
+  margin-right: 8px;
 }
 </style>

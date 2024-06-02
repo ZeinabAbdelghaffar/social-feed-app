@@ -1,39 +1,45 @@
 <template>
   <div class="actions-area">
-    <v-row>
-      <v-col>
+    <v-row class="actions-row">
+      <v-col cols="1">
         <div class="reaction">
-          <v-btn :class="{ 'reacted': localPost.reacted === 'likes' }" icon @click="toggleReaction('likes')">
+          <v-btn :class="{ 'reacted': localPost.reacted === 'likes' }" small icon @click="toggleReaction('likes')">
             <v-icon>mdi-thumb-up-outline</v-icon>
           </v-btn>
           <span>{{ localPost.reactions.likes }}</span>
         </div>
       </v-col>
-      <v-col>
+      <v-col cols="1">
         <div class="reaction">
-          <v-btn :class="{ 'reacted': localPost.reacted === 'dislikes' }" icon @click="toggleReaction('dislikes')">
+          <v-btn :class="{ 'reacted': localPost.reacted === 'dislikes' }" small icon @click="toggleReaction('dislikes')">
             <v-icon>mdi-thumb-down-outline</v-icon>
           </v-btn>
           <span>{{ localPost.reactions.dislikes }}</span>
         </div>
       </v-col>
-      <v-col>
-        <v-btn outlined @click="toggleWriteComment">Comment</v-btn>
+      <v-col cols="1">
+        <v-btn outlined class="comment-btn" @click="toggleWriteComment">
+          <v-icon>mdi-comment-outline</v-icon>
+        </v-btn>
         <v-slide-y-transition>
-          <div v-if="showWriteComment">
-            <textarea v-model="newComment" rows="4" cols="50"></textarea>
-            <v-btn @click="addCommentLocally">Add Comment</v-btn>
+          <div v-if="showWriteComment" class="comment-box">
+            <textarea v-model="newComment" rows="4" placeholder="Write a comment"></textarea>
+            <v-btn class="add-comment-btn" @click="addCommentLocally">Add Comment</v-btn>
           </div>
         </v-slide-y-transition>
       </v-col>
-      <v-col>
-        <v-btn outlined @click="showShareModal = true">Share</v-btn>
+      <v-col cols="1">
+        <v-btn outlined class="share-btn" @click="showShareModal = true">
+          <v-icon>mdi-share-variant</v-icon>
+        </v-btn>
         <v-dialog v-model="showShareModal" max-width="500px">
-          <v-card>
+          <v-card class="share-dialog">
             <v-card-title>Share Post</v-card-title>
             <v-card-text>
               <p>URL: {{ postUrl }}</p>
-              <v-btn @click="copyUrlToClipboard">Copy URL</v-btn>
+              <v-btn @click="copyUrlToClipboard">
+                <v-icon>mdi-content-copy</v-icon>
+              </v-btn>
             </v-card-text>
           </v-card>
         </v-dialog>
@@ -99,13 +105,41 @@ export default {
 
 <style scoped>
 .actions-area {
-  margin-bottom: 20px;
+  margin: 20px;
 }
+
+.actions-row {
+  display: flex;
+  justify-content: space-between;
+}
+
 .reaction {
   display: flex;
   align-items: center;
 }
+
 .reacted {
-  background-color: #e0e0e0;
+  background-color: #FF9800;
+  color: #FFF;
+  border: none;
+}
+
+.comment-btn, .share-btn {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.comment-box {
+  margin-top: 10px;
+}
+
+.add-comment-btn {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.share-dialog {
+  max-width: 500px;
 }
 </style>

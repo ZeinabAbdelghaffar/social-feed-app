@@ -120,3 +120,11 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.feed-page h2 {
+  margin: 50px; 
+  background-color: #FF9800;
+  line-height: 50px;
+}
+</style>
