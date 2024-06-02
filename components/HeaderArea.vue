@@ -7,8 +7,12 @@
 <style scoped>
 .header {
   background-color: #1E1E1E;
-  padding: 24px; 
+  padding: 24px;
   color: white;
-  border-bottom: 5px solid #FF9800; 
+  border-bottom: 5px solid #FF9800;
+}
+
+.header-title {
+  color: #FF9800;
 }
 </style>

@@ -2,13 +2,16 @@
   <div class="feed-page">
     <SiteHeader />
     <div>
-      <ul v-if="posts.length > 0">
-        <li v-for="post in posts" :key="post.id">
+      <h2>{{ visiblePosts.length }} Feeds</h2>
+      <ul>
+        <li v-for="post in visiblePosts" :key="post.id">
           <PostContainer :post="post" />
         </li>
       </ul>
-      <CommentsArea v-if="posts.length > 0" :comments="posts.flatMap(post => post.comments)" />
-      <p v-else>No posts found.</p>
+      <p v-if="isLoading">Loading more posts...</p>
+      <p v-else-if="!allPostsLoaded">Scroll down to load more posts.</p>
+      <p v-else-if="!hasPosts">No New Posts</p>
+      <p v-else>No more posts to load.</p>
     </div>
     <SiteFooter />
   </div>
@@ -18,78 +21,100 @@
 import SiteHeader from '@/components/HeaderArea.vue'; 
 import SiteFooter from '@/components/FooterArea.vue'; 
 import PostContainer from '@/components/PostContainer.vue';
-import CommentsArea from '@/components/CommentsArea.vue';
 import { fetchPosts, fetchUser, fetchComments } from '@/services/Api';
 
 export default {
   components: {
     SiteHeader,
     SiteFooter,
-    PostContainer,
-    CommentsArea
+    PostContainer
   },
   data() {
     return {
-      posts: []
+      posts: [],
+      visiblePosts: [],
+      postLimit: 10,
+      isLoading: false,
+      allPostsLoaded: false
     };
+  },computed: {
+    hasPosts() {
+      return this.visiblePosts.length > 0;
+    }
   },
-  created() {
-    this.loadPosts();
+  async mounted() {
+    window.addEventListener('scroll', this.handleScroll);
+    await this.loadPosts();
+  },
+  destroyed() {
+    window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
     async loadPosts() {
+  try {
+    this.isLoading = true;
+    const posts = await fetchPosts(this.posts.length, 1); // Fetch one post
+    if (posts.length > 0) {
+      const post = posts[0];
+      const postDetails = await this.loadPostDetails(post);
+      this.posts.push(postDetails);
+      this.visiblePosts.push(postDetails);
+
+      // Check if the number of posts reaches 30
+      if (this.posts.length === 30) {
+        // Display "No New Posts" message
+        this.allPostsLoaded = true;
+      }
+    } else {
+      this.allPostsLoaded = true;
+    }
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+  } finally {
+    this.isLoading = false;
+  }
+},
+
+    async loadPostDetails(post) {
       try {
-        const posts = await fetchPosts();
-        this.posts = posts.map(post => ({
+        const user = await fetchUser(post.userId);
+        const creator = {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          image: user.image
+        };
+
+        const commentsResponse = await fetchComments(post.id);
+        const comments = commentsResponse.comments.map(comment => ({
+          id: comment.id,
+          body: comment.body,
+          user: {
+            username: comment.user.username,
+            fullName: comment.user.fullName,
+            image: comment.user.image
+          }
+        }));
+
+        return {
           id: post.id,
           title: post.title,
           body: post.body,
           userId: post.userId,
-          creator: {},
+          creator,
           reactions: post.reactions,
-          comments: []
-        }));
-        this.loadPostDetails();
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      }
-    },
-    async loadPostDetails() {
-      const promises = this.posts.map(async (post) => {
-        try {
-          const user = await fetchUser(post.userId);
-          post.creator = {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            username: user.username,
-            image: user.image
-          };
-        } catch (error) {
-          console.error('Error fetching user details:', error);
-        }
-
-        try {
-          const commentsResponse = await fetchComments(post.id);
-          console.log('Fetched comments for post:', post.id, commentsResponse); // Debug statement
-          post.comments = commentsResponse.comments.map(comment => ({
-            id: comment.id,
-            body: comment.body,
-            user: {
-              username: comment.user.username,
-              fullName: comment.user.fullName,
-              image: comment.user.image
-            }
-          }));
-        } catch (error) {
-          console.error('Error fetching comments:', error);
-        }
-      });
-
-      try {
-        await Promise.all(promises);
-        this.posts = [...this.posts];
+          comments
+        };
       } catch (error) {
         console.error('Error loading post details:', error);
+        return null;
+      }
+    },
+    handleScroll() {
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const pageHeight = document.body.scrollHeight;
+      if (scrollPosition >= pageHeight && !this.isLoading && !this.allPostsLoaded) {
+        this.loadPosts();
       }
     }
   }
