@@ -1,7 +1,7 @@
 <template>
   <v-container class="comments-area">
     <template v-if="comments.length > 0">
-      <v-list>
+      <v-list style="max-height: 300px; overflow-y: auto;">
         <v-list-item v-for="comment in visibleComments" :key="comment.id">
           <v-list-item-avatar v-if="comment.user.image" :src="comment.user.image"></v-list-item-avatar>
           <v-list-item-content>
@@ -24,6 +24,7 @@
         </v-list-item>
       </v-list>
       <v-btn v-if="visibleComments.length < comments.length" class="view-more-comments" @click="viewMoreComments">View more comments</v-btn>
+      <p v-else-if="visibleComments.length === comments.length" class="no-more-comments">No more comments to load.</p>
     </template>
     <template v-else>
       <p class="no-comments">No comments available.</p>
@@ -126,6 +127,10 @@ export default {
 }
 
 .view-more-comments {
+  margin-top: 10px;
+}
+
+.no-more-comments {
   margin-top: 10px;
 }
 </style>
