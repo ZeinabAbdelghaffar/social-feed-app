@@ -47,30 +47,29 @@ export default {
     }
   },
   async created() {
-  this.userId = this.$route.params.userId;
-  console.log('UserId:', this.userId); // Check if userId is correctly captured
-  await this.loadPosts();
-},
+    this.userId = this.$route.params.userId;
+    await this.loadPosts();
+  },
   methods: {
     async loadPosts() {
-  try {
-    this.isLoading = true;
-    const posts = await fetchPostsByUser(this.userId); // Use this.userId
-    if (posts.length > 0) {
-      this.posts.push(...posts);
-      this.visiblePosts.push(...posts);
-      if (this.posts.length === 30) {
-        this.allPostsLoaded = true;
+      try {
+        this.isLoading = true;
+        const posts = await fetchPostsByUser(this.userId); 
+        if (posts.length > 0) {
+          this.posts.push(...posts);
+          this.visiblePosts.push(...posts);
+          if (this.posts.length === 30) {
+            this.allPostsLoaded = true;
+          }
+        } else {
+          this.allPostsLoaded = true;
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      } finally {
+        this.isLoading = false;
       }
-    } else {
-      this.allPostsLoaded = true;
-    }
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-  } finally {
-    this.isLoading = false;
-  }
-},
+    },
     async loadPostDetails(post) {
       try {
         const user = await fetchUser(post.userId);

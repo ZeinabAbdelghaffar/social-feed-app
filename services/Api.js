@@ -18,36 +18,29 @@ export const fetchComments = (postId) => {
   return axios.get(`${API_URL}/comments/post/${postId}`)
     .then(response => {
       const comments = response.data.comments;
-      const commentPromises = comments.map(comment => {
-        return fetchUser(comment.user.id) 
-          .then(user => {
-            comment.user.image = user.image;
-            return comment;
-          });
+      const commentPromises = comments.map(async comment => {
+        try {
+          const user = await fetchUser(comment.user.id);
+          console.log('User ID:', user.id);
+          comment.user.image = user.image;
+          comment.user.id = user.id; 
+          return comment;
+        } catch (error) {
+          console.error('Error fetching user:', error);
+          return null; 
+        }
       });
       return Promise.all(commentPromises)
-        .then(commentsWithImage => ({ comments: commentsWithImage }));
+        .then(commentsWithImage => ({ comments: commentsWithImage.filter(comment => comment !== null) }));
     })
     .catch(error => { throw error; });
 };
 
 export const fetchPostsByUser = (userId) => {
-  console.log('UserId in fetchPostsByUser:', userId); 
   return axios.get(`${API_URL}/posts/user/${userId}`)
     .then(response => {
       if (response.data && response.data.posts) {
-        const posts = response.data.posts;
-        const postPromises = posts.map(post => {
-          return fetchUser(post.userId)
-            .then(user => {
-              post.user = {
-                id: user.id,
-                image: user.image
-              };
-              return post;
-            });
-        });
-        return Promise.all(postPromises);
+        return response.data.posts;
       } else {
         throw new Error('No posts found for this user');
       }

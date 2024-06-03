@@ -13,8 +13,8 @@ export default new Router({
       component: FeedPage
     },
     {
-      path: '/user-feed/:userId',
-      name: 'UserFeedPage',
+      path: '/UserFeedPage',
+      name: 'UserFeed',
       component: UserFeedPage
     }
   ]

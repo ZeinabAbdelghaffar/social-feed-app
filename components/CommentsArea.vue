@@ -1,8 +1,8 @@
 <template>
   <v-container class="comments-area">
-    <template v-if="localComments.length > 0">
+    <template v-if="displayedComments.length > 0">
       <v-list style="max-height: 300px; overflow-y: auto;">
-        <v-list-item v-for="comment in visibleComments" :key="comment.id">
+        <v-list-item v-for="comment in displayedComments" :key="comment.id">
           <v-list-item-avatar>
             <img :src="comment.user.image" :alt="comment.user.username">
           </v-list-item-avatar>
@@ -61,10 +61,19 @@ export default {
     };
   },
   computed: {
-    visibleComments() {
-      return this.localComments.slice(0, this.currentCommentIndex).map(comment => ({
+    displayedComments() {
+      return this.localComments.map(comment => ({
         ...comment,
-        likes: this.commentLikes[comment.id] || 0
+        user: {
+          ...comment.user,
+          id: this.commentLikes[comment.id] ? this.commentLikes[comment.id].id : ''
+        }
+      }));
+    },
+    visibleComments() {
+      return this.displayedComments.slice(0, this.currentCommentIndex).map(comment => ({
+        ...comment,
+        likes: this.commentLikes[comment.id] ? this.commentLikes[comment.id].likes : 0
       }));
     }
   },
@@ -127,8 +136,8 @@ export default {
     },
     initializeLikesAndState(comments) {
       comments.forEach(comment => {
-        this.$set(this.commentLikes, comment.id, comment.likes || 0);
-        this.$set(this.reactState, comment.id, 0); // default reaction state
+        this.$set(this.commentLikes, comment.id, { id: '', likes: comment.likes || 0 });
+        this.$set(this.reactState, comment.id, 0); 
       });
       this.fetchCommentLikes();
     },
@@ -138,7 +147,7 @@ export default {
           const response = await fetch(`https://dummyjson.com/comments/${comment.id}`);
           const commentData = await response.json();
           if (commentData.likes !== undefined) {
-            this.$set(this.commentLikes, comment.id, commentData.likes);
+            this.$set(this.commentLikes, comment.id, { id: commentData.id, likes: commentData.likes });
           } else {
             console.error(`Likes data not found for comment ${comment.id}`);
           }
