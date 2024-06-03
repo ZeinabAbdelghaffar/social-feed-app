@@ -83,7 +83,6 @@ export default {
       document.execCommand('copy');
       document.body.removeChild(urlInput);
       this.urlCopied = true;
-      window.open(dynamicUrl, '_blank');
       setTimeout(() => {
         this.urlCopied = false;
       }, 3000);
