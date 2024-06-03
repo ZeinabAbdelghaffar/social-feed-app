@@ -3,7 +3,6 @@
     <CreatorArea :creator="post.creator" :title="post.title" :content="post.body" />
     <ActionsArea :post="post" />
     <CommentsArea :comments="post.comments" />
-    <ShareModal />
   </v-card>
 </template>
 

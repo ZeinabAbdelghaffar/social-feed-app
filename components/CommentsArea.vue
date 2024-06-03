@@ -10,9 +10,9 @@
             <v-list-item-title class="comment-author">
               {{ comment.user.fullName }} 
             </v-list-item-title>
-            <v-list-item-title class="comment-owner" @click="redirectToUserFeed(comment.user.id)">
-              @{{ comment.user.username }}
-            </v-list-item-title>
+<v-list-item-title class="comment-owner" style="cursor: pointer;" @click="redirectToUserFeed(comment.user)">
+  @{{ comment.user.username }}
+</v-list-item-title>
             <v-list-item-subtitle class="comment-text">{{ comment.body }}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
@@ -42,6 +42,7 @@
 
 <script>
 import { EventBus } from '@/services/eventBus';
+import { fetchPostsByUser } from '@/services/Api';
 
 export default {
   props: {
@@ -130,10 +131,27 @@ export default {
       if (this.currentCommentIndex > this.localComments.length) {
         this.currentCommentIndex = this.localComments.length;
       }
-    },
-    redirectToUserFeed(userId) {
-      this.$router.push({ name: 'UserFeedPage', params: { userId } });
-    },
+    },async redirectToUserFeed(user) {
+    if (!user || !user.id) {
+      console.error('Error: User ID is null or undefined');
+      return;
+    }
+
+    try {
+      // Fetch user posts
+      const userPosts = await fetchPostsByUser(user.id);
+
+      // Save user ID and posts to local storage
+      localStorage.setItem('userPosts', JSON.stringify(userPosts));
+      localStorage.setItem('userId', user.id);
+
+      // Navigate to user feed page
+      this.$router.push({ name: 'UserFeedPage', params: { userId: user.id } });
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+    }
+  }
+,
     initializeLikesAndState(comments) {
       comments.forEach(comment => {
         this.$set(this.commentLikes, comment.id, { id: '', likes: comment.likes || 0 });

@@ -1,141 +1,154 @@
 <template>
-  <div class="user-feed-page">
+  <div class="feed-page">
     <SiteHeader />
-    <div>
-      <h2>{{ visiblePosts.length }} Feeds for {{ userId }}</h2>
-      <ul>
-        <li v-for="post in visiblePosts" :key="post.id">
-          <PostContainer :post="post" />
+    <div v-if="userPosts.length > 0" class="user-posts">
+      <div class="user-info">
+        <h2> There is {{ userPosts.length }} Feeds</h2>
+        <p>User ID: {{ userId }} , UserName: @{{ userName }}</p>
+        <div v-if="userImage">
+          <img :src="userImage" alt="User Image">
+        </div>
+      </div>
+      <ul class="post-list">
+        <li v-for="post in userPosts" :key="post.id" class="post-item">
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.body }}</p>
+          <div class="tags">
+            <span v-for="tag in post.tags" :key="tag" class="tag">#{{ tag }}</span>
+          </div>
+          <div class="reactions">
+            <div class="like"><i class="fas fa-thumbs-up"></i> Likes: {{ post.reactions.likes }}</div> 
+            <div class="dislike"><i class="fas fa-thumbs-down"></i> Dislikes: {{ post.reactions.dislikes }}</div> 
+          </div>
         </li>
       </ul>
-      <div v-if="isLoading" class="loading-container">
-        <i class="fas fa-spinner fa-spin"></i>
-        <p>Loading more posts...</p>
-      </div>
-      <p v-else-if="!allPostsLoaded">Scroll down to load more posts.</p>
-      <p v-else-if="!hasPosts">No New Posts</p>
-      <p v-else>No more posts to load.</p>
+      <router-link to="/FeedPage" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to FeedPage
+      </router-link>
+    </div>
+    <div v-else class="no-posts">
+      <p>No posts available for this user.</p>
     </div>
     <SiteFooter />
   </div>
 </template>
 
 <script>
-import SiteHeader from '@/components/HeaderArea.vue';
-import SiteFooter from '@/components/FooterArea.vue';
-import PostContainer from '@/components/PostContainer.vue';
-import { fetchPostsByUser, fetchUser, fetchComments } from '@/services/Api';
+import SiteHeader from '@/components/HeaderArea.vue'; 
+import SiteFooter from '@/components/FooterArea.vue'; 
+import { fetchPostsByUser, fetchUser } from '@/services/Api'; 
 
 export default {
   components: {
     SiteHeader,
-    SiteFooter,
-    PostContainer
-  },
+    SiteFooter
+  },  
   data() {
     return {
-      posts: [],
-      visiblePosts: [],
-      isLoading: false,
-      allPostsLoaded: false,
-      userId: null
+      userPosts: [],
+      userId: '',
+      userImage: '',
+      userName: ''
     };
   },
-  computed: {
-    hasPosts() {
-      return this.visiblePosts.length > 0;
-    }
-  },
-  async created() {
-    this.userId = this.$route.params.userId;
-    await this.loadPosts();
-  },
-  methods: {
-    async loadPosts() {
-      try {
-        this.isLoading = true;
-        const posts = await fetchPostsByUser(this.userId); 
-        if (posts.length > 0) {
-          this.posts.push(...posts);
-          this.visiblePosts.push(...posts);
-          if (this.posts.length === 30) {
-            this.allPostsLoaded = true;
-          }
-        } else {
-          this.allPostsLoaded = true;
-        }
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    async loadPostDetails(post) {
-      try {
-        const user = await fetchUser(post.userId);
-        const creator = {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          username: user.username,
-          image: user.image
-        };
-
-        const commentsResponse = await fetchComments(post.id);
-        const comments = commentsResponse.comments.map(comment => ({
-          id: comment.id,
-          body: comment.body,
-          user: {
-            username: comment.user.username,
-            fullName: comment.user.fullName,
-            image: comment.user.image
-          }
-        }));
-
-        return {
-          id: post.id,
-          title: post.title,
-          body: post.body,
-          userId: post.userId,
-          creator,
-          reactions: post.reactions,
-          comments
-        };
-      } catch (error) {
-        console.error('Error loading post details:', error);
-        return null;
-      }
-    },
-    handleScroll() {
-      const scrollPosition = window.innerHeight + window.scrollY;
-      const pageHeight = document.body.scrollHeight;
-      if (scrollPosition >= pageHeight && !this.isLoading && !this.allPostsLoaded) {
-        this.loadPosts();
-      }
+  created() {
+    this.userId = localStorage.getItem('userId'); 
+    if (this.userId) {
+      fetchUser(this.userId)
+        .then(user => {
+          console.log('User:', user);
+          this.userImage = user.image;
+          this.userName = user.username; 
+        })
+        .catch(error => console.error('Error fetching user:', error));
+      fetchPostsByUser(this.userId)
+        .then(posts => {
+          console.log('User Posts from API:', posts);
+          this.userPosts = posts; 
+        })
+        .catch(error => console.error('Error fetching user posts:', error));
+    } else {
+      console.error('Error: User ID not found in local storage');
     }
   }
 };
 </script>
 
 <style scoped>
-.user-feed-page h2 {
-  margin-top: 20px;
-  margin-bottom: -20px;
-  margin-left: 50px; 
-  margin-right: 50px; 
-  background-color: #FF9800;
+.feed-page {
+  font-family: Arial, sans-serif;
 }
-.user-feed-page p {
-  margin-top: -25px;
-  margin-bottom: 10px;
-  text-align: center;
+.feed-page h2{
+  margin: 20px 0px -15px 55px;
 }
-.loading-container {
+.user-info {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+.user-info img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-right: 50px;
+  margin-top: 10px;
+  border: 1px solid #FF9800;
+}
+.post-list {
+  list-style-type: none;
+  padding: 0;
+}
+.post-item {
+  border: 1px solid #FF9800;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 20px 50px 20px 50px;
+  transition: box-shadow 0.3s ease;
+}
+.post-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.tags {
+  margin-top: 10px;
+}
+.tag {
+  margin-right: 5px;
+  background-color: #f0f0f0;
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+.reactions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.no-posts {
+  text-align: center;
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+.back-button {
+  margin-bottom: 20px;
+  margin-top: -20px;
+  margin-left: 50px;
+  padding: 10px 20px;
+  background-color: transparent;
+  color: #FF9800;
+  border: 1px solid #FF9800;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
   align-items: center;
 }
-.loading-container i {
-  font-size: 30px;
-  margin-right: 200px;
+.back-button:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+.back-button i {
+  margin-right: 5px;
 }
 </style>

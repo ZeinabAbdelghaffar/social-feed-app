@@ -40,7 +40,9 @@ export const fetchPostsByUser = (userId) => {
   return axios.get(`${API_URL}/posts/user/${userId}`)
     .then(response => {
       if (response.data && response.data.posts) {
-        return response.data.posts;
+        const userPosts = response.data.posts;
+        console.log('User Posts from Api:', userPosts); 
+        return userPosts;
       } else {
         throw new Error('No posts found for this user');
       }
