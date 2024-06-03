@@ -2,7 +2,7 @@
   <v-container class="comments-area">
     <template v-if="displayedComments.length > 0">
       <v-list style="max-height: 300px; overflow-y: auto;">
-        <v-list-item v-for="comment in displayedComments" :key="comment.id">
+        <v-list-item v-for="comment in visibleComments" :key="comment.id">
           <v-list-item-avatar>
             <img :src="comment.user.image" :alt="comment.user.username">
           </v-list-item-avatar>
@@ -10,9 +10,9 @@
             <v-list-item-title class="comment-author">
               {{ comment.user.fullName }} 
             </v-list-item-title>
-<v-list-item-title class="comment-owner" style="cursor: pointer;" @click="redirectToUserFeed(comment.user)">
-  @{{ comment.user.username }}
-</v-list-item-title>
+            <v-list-item-title class="comment-owner" style="cursor: pointer;" @click="redirectToUserFeed(comment.user)">
+              @{{ comment.user.username }}
+            </v-list-item-title>
             <v-list-item-subtitle class="comment-text">{{ comment.body }}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
@@ -107,22 +107,23 @@ export default {
             fullName: 'Current User',
             username: 'currentuser',
             image: 'path-to-user-image'
-          }
+          },
+          likes: 0
         };
         this.localComments.unshift(newComment);
-        this.$set(this.commentLikes, newComment.id, 0);
+        this.$set(this.commentLikes, newComment.id, { id: newComment.id, likes: 0 });
         this.$set(this.reactState, newComment.id, 0);
-        
+
         this.newComment = '';
         this.showCommentInput = false;
       }
     },
     reactToComment(commentId) {
       if (this.reactState[commentId] === 0 || this.reactState[commentId] === undefined) {
-        this.$set(this.commentLikes, commentId, (this.commentLikes[commentId] || 0) + 1);
+        this.$set(this.commentLikes, commentId, { id: commentId, likes: (this.commentLikes[commentId].likes || 0) + 1 });
         this.$set(this.reactState, commentId, 1);
       } else {
-        this.$set(this.commentLikes, commentId, this.commentLikes[commentId] - 1);
+        this.$set(this.commentLikes, commentId, { id: commentId, likes: this.commentLikes[commentId].likes - 1 });
         this.$set(this.reactState, commentId, 0);
       }
     },
@@ -131,45 +132,47 @@ export default {
       if (this.currentCommentIndex > this.localComments.length) {
         this.currentCommentIndex = this.localComments.length;
       }
-    },async redirectToUserFeed(user) {
-    if (!user || !user.id) {
-      console.error('Error: User ID is null or undefined');
-      return;
-    }
+    },
+    async redirectToUserFeed(user) {
+      if (!user || !user.id) {
+        console.error('Error: User ID is null or undefined');
+        return;
+      }
 
-    try {
-      // Fetch user posts
-      const userPosts = await fetchPostsByUser(user.id);
+      try {
+        const userPosts = await fetchPostsByUser(user.id);
 
-      // Save user ID and posts to local storage
-      localStorage.setItem('userPosts', JSON.stringify(userPosts));
-      localStorage.setItem('userId', user.id);
+        localStorage.setItem('userPosts', JSON.stringify(userPosts));
+        localStorage.setItem('userId', user.id);
 
-      // Navigate to user feed page
-      this.$router.push({ name: 'UserFeedPage', params: { userId: user.id } });
-    } catch (error) {
-      console.error('Error fetching user posts:', error);
-    }
-  }
-,
+        this.$router.push({ name: 'UserFeedPage', params: { userId: user.id } });
+      } catch (error) {
+        console.error('Error fetching user posts:', error);
+      }
+    },
     initializeLikesAndState(comments) {
       comments.forEach(comment => {
-        this.$set(this.commentLikes, comment.id, { id: '', likes: comment.likes || 0 });
-        this.$set(this.reactState, comment.id, 0); 
+        this.$set(this.commentLikes, comment.id, { id: comment.id, likes: comment.likes || 0 });
+        this.$set(this.reactState, comment.id, 0);
       });
       this.fetchCommentLikes();
     },
     async fetchCommentLikes() {
       try {
-        await Promise.all(this.localComments.map(async comment => {
+        const fetchPromises = this.localComments.map(async comment => {
           const response = await fetch(`https://dummyjson.com/comments/${comment.id}`);
-          const commentData = await response.json();
-          if (commentData.likes !== undefined) {
-            this.$set(this.commentLikes, comment.id, { id: commentData.id, likes: commentData.likes });
-          } else {
-            console.error(`Likes data not found for comment ${comment.id}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch likes for comment ${comment.id}`);
           }
-        }));
+          const commentData = await response.json();
+          return { id: comment.id, likes: commentData.likes };
+        });
+
+        const results = await Promise.all(fetchPromises);
+        results.forEach(({ id, likes }) => {
+          this.$set(this.commentLikes, id, { id, likes });
+        });
+        console.log('Fetched likes:', this.commentLikes);
       } catch (error) {
         console.error('Error fetching comment likes:', error);
       }
