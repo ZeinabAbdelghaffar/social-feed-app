@@ -2,7 +2,7 @@
   <div class="user-feed-page">
     <SiteHeader />
     <div>
-      <h2>{{ visiblePosts.length }} Feeds</h2>
+      <h2>{{ visiblePosts.length }} Feeds for {{ userId }}</h2>
       <ul>
         <li v-for="post in visiblePosts" :key="post.id">
           <PostContainer :post="post" />
@@ -21,8 +21,8 @@
 </template>
 
 <script>
-import SiteHeader from '@/components/HeaderArea.vue'; 
-import SiteFooter from '@/components/FooterArea.vue'; 
+import SiteHeader from '@/components/HeaderArea.vue';
+import SiteFooter from '@/components/FooterArea.vue';
 import PostContainer from '@/components/PostContainer.vue';
 import { fetchPostsByUser, fetchUser, fetchComments } from '@/services/Api';
 
@@ -36,10 +36,9 @@ export default {
     return {
       posts: [],
       visiblePosts: [],
-      postLimit: 10,
       isLoading: false,
       allPostsLoaded: false,
-      userId: null 
+      userId: null
     };
   },
   computed: {
@@ -48,29 +47,30 @@ export default {
     }
   },
   async created() {
-    this.userId = this.$route.params.userId; 
-    await this.loadPosts();
-  },
+  this.userId = this.$route.params.userId;
+  console.log('UserId:', this.userId); // Check if userId is correctly captured
+  await this.loadPosts();
+},
   methods: {
     async loadPosts() {
-      try {
-        this.isLoading = true;
-        const posts = await fetchPostsByUser(this.userId); 
-        if (posts.length > 0) {
-          this.posts.push(...posts);
-          this.visiblePosts.push(...posts);
-          if (this.posts.length === 30) {
-            this.allPostsLoaded = true;
-          }
-        } else {
-          this.allPostsLoaded = true;
-        }
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      } finally {
-        this.isLoading = false;
+  try {
+    this.isLoading = true;
+    const posts = await fetchPostsByUser(this.userId); // Use this.userId
+    if (posts.length > 0) {
+      this.posts.push(...posts);
+      this.visiblePosts.push(...posts);
+      if (this.posts.length === 30) {
+        this.allPostsLoaded = true;
       }
-    },
+    } else {
+      this.allPostsLoaded = true;
+    }
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+  } finally {
+    this.isLoading = false;
+  }
+},
     async loadPostDetails(post) {
       try {
         const user = await fetchUser(post.userId);
