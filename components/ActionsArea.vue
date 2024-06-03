@@ -33,7 +33,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <div v-if="urlCopied" class="url-copied-message">Post URL has been copied to your clipboard! You can try it in new tab.</div>
+    <div v-if="urlCopied" class="url-copied-message">Post URL has been copied to your clipboard!</div>
   </div>
 </template>
 
@@ -74,13 +74,16 @@ export default {
       }
     },
     copyUrlToClipboard() {
+      const randomNumber = Math.floor(Math.random() * 30) + 1;
+      const dynamicUrl = `https://dummyjson.com/posts/${randomNumber}`;
       const urlInput = document.createElement('textarea');
-      urlInput.value = this.postUrl;
+      urlInput.value = dynamicUrl;
       document.body.appendChild(urlInput);
       urlInput.select();
       document.execCommand('copy');
       document.body.removeChild(urlInput);
       this.urlCopied = true;
+      window.open(dynamicUrl, '_blank');
       setTimeout(() => {
         this.urlCopied = false;
       }, 3000);

@@ -39,7 +39,7 @@ export default {
       postLimit: 10,
       isLoading: false,
       allPostsLoaded: false,
-      userId: null // Add userId data property
+      userId: null 
     };
   },
   computed: {
@@ -48,21 +48,18 @@ export default {
     }
   },
   async created() {
-    this.userId = this.$route.params.userId; // Get userId from route params
+    this.userId = this.$route.params.userId; 
     await this.loadPosts();
   },
   methods: {
     async loadPosts() {
       try {
         this.isLoading = true;
-        const posts = await fetchPostsByUser(this.userId); // Fetch user-specific posts
+        const posts = await fetchPostsByUser(this.userId); 
         if (posts.length > 0) {
           this.posts.push(...posts);
           this.visiblePosts.push(...posts);
-
-          // Check if the number of posts reaches 30
           if (this.posts.length === 30) {
-            // Display "No New Posts" message
             this.allPostsLoaded = true;
           }
         } else {
@@ -76,7 +73,6 @@ export default {
     },
     async loadPostDetails(post) {
       try {
-        // Add await here
         const user = await fetchUser(post.userId);
         const creator = {
           firstName: user.firstName,

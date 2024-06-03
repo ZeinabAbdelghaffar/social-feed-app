@@ -11,7 +11,6 @@
   color: white;
   border-bottom: 5px solid #FF9800;
 }
-
 .header-title {
   color: #FF9800;
 }

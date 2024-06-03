@@ -65,38 +65,31 @@ export default {
   transition: box-shadow 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .creator-area:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
 .creator-info {
   font-size: 16px;
 }
-
 .post-title {
   font-size: 18px;
   margin-top: 10px;
 }
-
 .post-content {
   margin-top: 10px;
   line-height: 1.5;
 }
-
 .limited-content {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .show-more,
 .show-less {
   color: #007bff !important;
   cursor: pointer;
   text-decoration: underline;
 }
-
 .show-more:hover,
 .show-less:hover {
   color: #0056b3 !important;
