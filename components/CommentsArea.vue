@@ -6,9 +6,12 @@
           <v-list-item-avatar>
             <img :src="comment.user.image" :alt="comment.user.username">
           </v-list-item-avatar>
-          <v-list-item-content @click="redirectToUserFeed(comment.user.id)">
+          <v-list-item-content>
             <v-list-item-title class="comment-author">
-              {{ comment.user.fullName }} @{{ comment.user.username }}
+              {{ comment.user.fullName }} 
+            </v-list-item-title>
+            <v-list-item-title class="comment-owner" @click="redirectToUserFeed(comment.user.id)">
+              @{{ comment.user.username }}
             </v-list-item-title>
             <v-list-item-subtitle class="comment-text">{{ comment.body }}</v-list-item-subtitle>
           </v-list-item-content>
@@ -154,6 +157,10 @@ export default {
 }
 .comment-author {
   font-weight: bold;
+}
+.comment-owner {
+  color: #007bff !important;
+  cursor: pointer;
 }
 .comment-text {
   color: #333;

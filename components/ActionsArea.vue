@@ -23,27 +23,17 @@
         </v-btn>
         <v-slide-y-transition>
           <div v-if="showWriteComment">
-            <v-btn class="add-comment-btn" @click="addCommentLocally">Add Comment</v-btn>
+            <v-btn @click="addCommentLocally">Add Comment</v-btn>
           </div>
         </v-slide-y-transition>
       </v-col>
       <v-col cols="1">
-        <v-btn outlined class="share-btn" @click="showShareModal = true">
-          <v-icon>mdi-share-variant</v-icon>
+        <v-btn outlined class="share-btn" @click="sharePost">
+          <v-icon>mdi-share-outline</v-icon>
         </v-btn>
-        <v-dialog v-model="showShareModal" max-width="500px">
-          <v-card class="share-dialog">
-            <v-card-title>Share Post</v-card-title>
-            <v-card-text>
-              <p>URL: {{ postUrl }}</p>
-              <v-btn @click="copyUrlToClipboard">
-                <v-icon>mdi-content-copy</v-icon>
-              </v-btn>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
       </v-col>
     </v-row>
+    <div v-if="urlCopied" class="url-copied-message">Post URL has been copied to your clipboard! You can try it in new tab.</div>
   </div>
 </template>
 
@@ -62,7 +52,7 @@ export default {
       localPost: { ...this.post, reacted: null, comments: [] },
       showWriteComment: false,
       newComment: '',
-      showShareModal: false,
+      urlCopied: false 
     };
   },
   computed: {
@@ -90,7 +80,12 @@ export default {
       urlInput.select();
       document.execCommand('copy');
       document.body.removeChild(urlInput);
-    },toggleReaction(reactionType) {
+      this.urlCopied = true;
+      setTimeout(() => {
+        this.urlCopied = false;
+      }, 3000);
+    },
+    toggleReaction(reactionType) {
       if (this.localPost.reacted === reactionType) {
         this.localPost.reactions[reactionType]--;
         this.localPost.reacted = null;
@@ -101,6 +96,9 @@ export default {
         this.localPost.reactions[reactionType]++;
         this.localPost.reacted = reactionType;
       }
+    },
+    sharePost() {
+      this.copyUrlToClipboard();
     }
   }
 };
@@ -110,35 +108,34 @@ export default {
 .actions-area {
   margin: 20px;
 }
-
 .actions-row {
   display: flex;
   justify-content: space-between;
 }
-
 .reaction {
   display: flex;
   align-items: center;
 }
-
 .reacted {
   background-color: #FF9800;
   color: #FFF;
   border: none;
 }
-
-.comment-btn, .share-btn {
+.comment-btn{
   width: 100%;
   text-align: center;
   margin-bottom: 10px;
+  border: none;
 }
-
-.add-comment-btn {
-  margin-top: 10px;
+.share-btn {
   width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+  border: none;
 }
-
-.share-dialog {
-  max-width: 500px;
+.url-copied-message{
+  width: 100%;
+  text-align: center;
+  background-color: #FF9800;
 }
 </style>

@@ -33,3 +33,17 @@ export const fetchPostsByUser = (userId) => {
       throw error;
     });
 };
+
+export const fetchUserIdByUsername = (username) => {
+  return axios.get(`${API_URL}/users?username=${username}`)
+    .then(response => {
+      if (response.data && response.data.length > 0) {
+        return response.data[0].id; // Assuming there's only one user with the given username
+      } else {
+        throw new Error('User not found');
+      }
+    })
+    .catch(error => {
+      throw error;
+    });
+};

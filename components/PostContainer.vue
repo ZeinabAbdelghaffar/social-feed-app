@@ -11,14 +11,12 @@
 import CreatorArea from './CreatorArea.vue';
 import ActionsArea from './ActionsArea.vue';
 import CommentsArea from './CommentsArea.vue';
-import ShareModal from './ShareModal.vue'; // Import ShareModal component
 
 export default {
   components: {
     CreatorArea,
     ActionsArea,
     CommentsArea,
-    ShareModal // Add ShareModal to the components
   },
   props: {
     post: {
