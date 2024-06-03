@@ -1,21 +1,44 @@
 <template>
-  <div v-if="showModal" class="share-modal">
-    <!-- Add your modal content here -->
-  </div>
+  <v-dialog v-model="showModal" max-width="500px">
+    <v-card>
+      <v-card-title>Share Post</v-card-title>
+      <v-card-text>
+        <p>URL: {{ postUrl }}</p>
+        <v-btn @click="copyUrlToClipboard">
+          <v-icon>mdi-content-copy</v-icon>
+          Copy
+        </v-btn>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn text @click="showModal = false">Close</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
 export default {
   props: {
-    post: {
-      type: Object,
-      default: () => ({}) 
+    postUrl: {
+      type: String,
+      required: true
     }
   },
   data() {
     return {
       showModal: false
     };
+  },
+  methods: {
+    copyUrlToClipboard() {
+      const urlInput = document.createElement('textarea');
+      urlInput.value = this.postUrl;
+      document.body.appendChild(urlInput);
+      urlInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(urlInput);
+      alert('URL copied to clipboard');
+    }
   }
 };
 </script>

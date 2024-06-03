@@ -18,12 +18,11 @@
         </div>
       </v-col>
       <v-col cols="1">
-        <v-btn outlined class="comment-btn" @click="toggleWriteComment">
+        <v-btn outlined class="comment-btn" @click="showCommentInput">
           <v-icon>mdi-comment-outline</v-icon>
         </v-btn>
         <v-slide-y-transition>
-          <div v-if="showWriteComment" class="comment-box">
-            <textarea v-model="newComment" rows="4" placeholder="Write a comment"></textarea>
+          <div v-if="showWriteComment">
             <v-btn class="add-comment-btn" @click="addCommentLocally">Add Comment</v-btn>
           </div>
         </v-slide-y-transition>
@@ -49,6 +48,8 @@
 </template>
 
 <script>
+import { EventBus } from '@/services/eventBus';
+
 export default {
   props: {
     post: {
@@ -70,17 +71,8 @@ export default {
     }
   },
   methods: {
-    toggleReaction(reactionType) {
-      if (this.localPost.reacted === reactionType) {
-        this.localPost.reactions[reactionType]--;
-        this.localPost.reacted = null;
-      } else {
-        if (this.localPost.reacted) {
-          this.localPost.reactions[this.localPost.reacted]--;
-        }
-        this.localPost.reactions[reactionType]++;
-        this.localPost.reacted = reactionType;
-      }
+    showCommentInput() {
+      EventBus.$emit('show-comment-input');
     },
     toggleWriteComment() {
       this.showWriteComment = !this.showWriteComment;
@@ -98,6 +90,17 @@ export default {
       urlInput.select();
       document.execCommand('copy');
       document.body.removeChild(urlInput);
+    },toggleReaction(reactionType) {
+      if (this.localPost.reacted === reactionType) {
+        this.localPost.reactions[reactionType]--;
+        this.localPost.reacted = null;
+      } else {
+        if (this.localPost.reacted) {
+          this.localPost.reactions[this.localPost.reacted]--;
+        }
+        this.localPost.reactions[reactionType]++;
+        this.localPost.reacted = reactionType;
+      }
     }
   }
 };
@@ -128,10 +131,6 @@ export default {
   width: 100%;
   text-align: center;
   margin-bottom: 10px;
-}
-
-.comment-box {
-  margin-top: 10px;
 }
 
 .add-comment-btn {

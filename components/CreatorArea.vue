@@ -29,15 +29,15 @@ export default {
   props: {
     creator: {
       type: Object,
-      default: () => ({})
+      required: true
     },
     title: {
       type: String,
-      default: ''
+      required: true
     },
     content: {
       type: String,
-      default: ''
+      required: true
     }
   },
   data() {
@@ -47,11 +47,7 @@ export default {
   },
   computed: {
     limitedContent() {
-      if (this.content.length > 50) {
-        return this.content.substring(0, 50) + '…';
-      } else {
-        return this.content;
-      }
+      return this.content.length > 50 ? `${this.content.substring(0, 50)}…` : this.content;
     },
     showLimitedContent() {
       return this.content.length > 50 && !this.showFullContent;
@@ -64,7 +60,7 @@ export default {
 .creator-area {
   margin: 20px;
   padding: 20px;
-  border: 1px solid #FF9800; 
+  border: 1px solid #FF9800;
   border-radius: 8px;
   transition: box-shadow 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -96,7 +92,7 @@ export default {
 
 .show-more,
 .show-less {
-  color: #007bff !important; 
+  color: #007bff !important;
   cursor: pointer;
   text-decoration: underline;
 }

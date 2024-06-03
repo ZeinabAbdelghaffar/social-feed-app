@@ -2,35 +2,31 @@ import axios from 'axios';
 
 const API_URL = 'https://dummyjson.com';
 
-export const fetchPosts = (skip = 0, limit = 30) => {
+export const fetchPosts = (skip = 0, limit = 1) => {
   return axios.get(`${API_URL}/posts`, { params: { skip, limit } })
-    .then(response => {
-      if (response.data && response.data.posts) {
-        return response.data.posts; 
-      } else {
-        throw new Error('No posts found');
-      }
-    })
-    .catch(error => {
-      throw error;
-    });
+    .then(response => response.data.posts)
+    .catch(error => { throw error; });
 };
 
 export const fetchUser = (id) => {
   return axios.get(`${API_URL}/users/${id}`)
     .then(response => response.data)
-    .catch(error => {
-      throw error;
-    });
+    .catch(error => { throw error; });
 };
 
-export const fetchComments = (postId, skip = 0, limit = 5) => {
-  return axios.get(`${API_URL}/comments/post/${postId}`, { params: { skip, limit } })
+export const fetchComments = (postId) => {
+  return axios.get(`${API_URL}/comments/post/${postId}`)
+    .then(response => response.data)
+    .catch(error => { throw error; });
+};
+
+export const fetchPostsByUser = (userId) => {
+  return axios.get(`${API_URL}/posts/user/${userId}`)
     .then(response => {
-      if (response.data && response.data.comments) {
-        return response.data;
+      if (response.data && response.data.posts) {
+        return response.data.posts;
       } else {
-        throw new Error('No comments found');
+        throw new Error('No posts found for this user');
       }
     })
     .catch(error => {

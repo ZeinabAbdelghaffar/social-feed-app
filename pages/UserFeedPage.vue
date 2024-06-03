@@ -1,5 +1,5 @@
 <template>
-  <div class="feed-page">
+  <div class="user-feed-page">
     <SiteHeader />
     <div>
       <h2>{{ visiblePosts.length }} Feeds</h2>
@@ -24,7 +24,7 @@
 import SiteHeader from '@/components/HeaderArea.vue'; 
 import SiteFooter from '@/components/FooterArea.vue'; 
 import PostContainer from '@/components/PostContainer.vue';
-import { fetchPosts, fetchUser, fetchComments } from '@/services/Api';
+import { fetchPostsByUser, fetchUser, fetchComments } from '@/services/Api';
 
 export default {
   components: {
@@ -38,7 +38,8 @@ export default {
       visiblePosts: [],
       postLimit: 10,
       isLoading: false,
-      allPostsLoaded: false
+      allPostsLoaded: false,
+      userId: null // Add userId data property
     };
   },
   computed: {
@@ -46,23 +47,18 @@ export default {
       return this.visiblePosts.length > 0;
     }
   },
-  async mounted() {
-    window.addEventListener('scroll', this.handleScroll);
+  async created() {
+    this.userId = this.$route.params.userId; // Get userId from route params
     await this.loadPosts();
-  },
-  destroyed() {
-    window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
     async loadPosts() {
       try {
         this.isLoading = true;
-        const posts = await fetchPosts(this.posts.length, 1); // Fetch one post
+        const posts = await fetchPostsByUser(this.userId); // Fetch user-specific posts
         if (posts.length > 0) {
-          const post = posts[0];
-          const postDetails = await this.loadPostDetails(post);
-          this.posts.push(postDetails);
-          this.visiblePosts.push(postDetails);
+          this.posts.push(...posts);
+          this.visiblePosts.push(...posts);
 
           // Check if the number of posts reaches 30
           if (this.posts.length === 30) {
@@ -78,9 +74,9 @@ export default {
         this.isLoading = false;
       }
     },
-
     async loadPostDetails(post) {
       try {
+        // Add await here
         const user = await fetchUser(post.userId);
         const creator = {
           firstName: user.firstName,
@@ -126,14 +122,14 @@ export default {
 </script>
 
 <style scoped>
-.feed-page h2 {
+.user-feed-page h2 {
   margin-top: 20px;
   margin-bottom: -20px;
   margin-left: 50px; 
   margin-right: 50px; 
   background-color: #FF9800;
 }
-.feed-page p {
+.user-feed-page p {
   margin-top: -25px;
   margin-bottom: 10px;
   text-align: center;
