@@ -1,6 +1,21 @@
 # Social Feed App
 
 Welcome to the Social Feed App! This project is a social feed application built using VueJS and NuxtJS. It allows users to view posts similar to any social network platform, interact with posts by reacting, commenting, and sharing, and explore posts of specific users.
+![image](https://github.com/ZeinabAbdelghaffar/social-feed-app/assets/87963230/c318548f-f495-4020-82d5-67e98fe2016d)
+
+
+**Table of Contents**  
+
+- [Social Feed App](#social-feed-app)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [APIs](#apis)
+  - [Design](#design)
+  - [Project Structure](#project-structure)
+  - [Post Structure](#post-structure)
+  - [Acceptance Criteria](#acceptance-criteria)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Features
 
